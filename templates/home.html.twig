@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<section class="hero">
+    <p class="eyebrow"><span class="live-dot"></span> {{ 'VOTRE RELEASE, SOUS UN AUTRE ANGLE'|trans }}</p>
+    <h1>{{ 'Un petit changement.'|trans }}<br>{{ 'Un bouton qui disparaît.'|trans }}</h1>
+    <p class="intro">{{ 'Ça arrive. Comparez deux versions de votre page et laissez deux agents examiner ce qui a changé, captures à l’appui.'|trans }}</p>
+</section>
+<section class="workspace" aria-label="{{ 'Lancer une revue visuelle'|trans }}">
+    <div class="review-form panel">
+        <div class="section-label"><span class="step">01</span> {{ 'VOS DEUX VERSIONS'|trans }}</div>
+        {% if error %}<p role="alert" class="alert">{{ error }}</p>{% endif %}
+        <form method="post" action="{{ path('review', {lang: app.request.locale}) }}" data-review-form>
+            <input type="hidden" name="_token" value="{{ token }}">
+            <div class="field"><label for="before">{{ 'Avant'|trans }} <span>{{ 'La version de référence'|trans }}</span></label><input id="before" name="before" type="url" maxlength="2048" placeholder="{{ 'https://votre-site.fr/produit'|trans }}" value="{{ values.before }}" required></div>
+            <div class="field"><label for="after">{{ 'Après'|trans }} <span>{{ 'La version à examiner'|trans }}</span></label><input id="after" name="after" type="url" maxlength="2048" placeholder="{{ 'https://preview.votre-site.fr/produit'|trans }}" value="{{ values.after }}" required></div>
+            <div class="field"><label for="claim">{{ 'Qu’est-ce qu’on vérifie ?'|trans }}</label><textarea id="claim" name="claim" minlength="10" maxlength="300" rows="3" required placeholder="{{ 'Le bouton Acheter reste entièrement visible sur mobile.'|trans }}">{{ values.claim }}</textarea><p class="hint">{{ 'Une observation précise, visible dans une capture.'|trans }}</p></div>
+            <div class="viewport"><span aria-hidden="true">▯</span> Mobile <strong>390 × 844 px</strong></div>
+            <button type="submit" class="button primary" data-label="{{ 'Comparer mes pages'|trans }}" data-loading-label="{{ 'On regarde vos pages…'|trans }}">{{ 'Comparer mes pages'|trans }}</button>
+            <p class="progress" role="status" hidden>{{ 'Capture des pages, puis inspection et seconde lecture… Cela peut prendre quelques minutes.'|trans }}</p>
+            <p class="hint form-note">{% if configured %}{{ 'Les deux captures seront transmises au modèle pour analyse.'|trans }}{% else %}{{ 'Le mode réel attend vos clés API dans'|trans }} <code>.env.local</code>. {{ 'Vous pouvez déjà explorer les exemples.'|trans }}{% endif %}</p>
+        </form>
+    </div>
+    <aside class="demo-panel">
+        <div class="section-label"><span class="step">02</span> {{ 'OU PARTEZ D’UN EXEMPLE'|trans }}</div>
+        <h2>{{ 'Voyez le problème.'|trans }}<br>{{ 'Puis la seconde lecture.'|trans }}</h2>
+        <p>{{ 'Une fiche produit, un bandeau qui prend trop de place, et un bouton masqué.'|trans }}</p>
+        <div class="mini-preview" aria-hidden="true"><div class="mini-browser"><i></i><i></i><i></i><span>atelier.example / produit</span></div><div class="mini-content"><span class="mini-tag">{{ 'LA COLLECTION ESSENTIELLE'|trans }}</span><div class="mini-vase">◡</div><strong>{{ 'Un peu de calme,'|trans }}<br>{{ 'sur votre bureau.'|trans }}</strong><div class="mini-buy">{{ 'Acheter — 39 €'|trans }}</div><div class="mini-overlay">{{ 'LIVRAISON OFFERTE DÈS 30 €'|trans }}</div></div><span class="annotation">{{ 'Le bouton est juste ici'|trans }}</span></div>
+        <form method="post" action="{{ path('demo', {scenario: 'broken', lang: app.request.locale}) }}"><input type="hidden" name="_token" value="{{ token }}"><button class="button secondary" type="submit">{{ 'Voir la régression'|trans }}</button></form>
+        <div class="demo-links">{% for scenario, label in {'fixed': 'Version corrigée', 'uncertain': 'Preuves insuffisantes', 'disagreement': 'Agents en désaccord'} %}<form method="post" action="{{ path('demo', {scenario: scenario, lang: app.request.locale}) }}"><input type="hidden" name="_token" value="{{ token }}"><button type="submit" class="link-button">{{ label|trans }}</button></form>{% endfor %}</div>
+        <p class="hint">{{ 'Exemples préenregistrés : aucune requête API, aucun crédit utilisé.'|trans }}</p>
+    </aside>
+</section>
+<section class="how-it-works" aria-label="{{ 'Comment ça marche'|trans }}"><div><span class="number">01 / {{ 'CAPTURER'|trans }}</span><h3>{{ 'La même fenêtre sur les deux pages.'|trans }}</h3><p>{{ 'Snapshot Site produit les captures et leur différence visuelle.'|trans }}</p></div><div><span class="number">02 / {{ 'EXAMINER'|trans }}</span><h3>{{ 'Un premier regard sur les faits.'|trans }}</h3><p>{{ 'L’inspecteur vérifie votre affirmation dans les images.'|trans }}</p></div><div><span class="number">03 / {{ 'CONTESTER'|trans }}</span><h3>{{ 'Une conclusion qui peut rester ouverte.'|trans }}</h3><p>{{ 'Le critique relit les captures originales. Un désaccord reste indéterminé.'|trans }}</p></div></section>
+{% endblock %}

@@ -1,0 +1,14 @@
+{
+  "name": "snapshot-site-visual-release-review",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test",
+    "fixtures": "node scripts/capture-fixtures.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  },
+  "dependencies": {
+    "@snapshot-site/mcp": "0.1.5"
+  }
+}

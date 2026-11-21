@@ -1,0 +1,20 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+
+parameters:
+    level: 8
+    phpVersion: 80400
+    paths:
+        - src
+        - tests
+        - translations
+        - public/index.php
+        - public/router.php
+        - config/bundles.php
+        - bin/console
+        - .php-cs-fixer.dist.php
+    tmpDir: var/phpstan
+    reportUnmatchedIgnoredErrors: true

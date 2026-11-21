@@ -1,0 +1,19 @@
+{
+  "name": "Snapshot Site — Visual Release Review",
+  "short_name": "Release Review",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ff6a00",
+  "background_color": "#f6f7f2",
+  "icons": [
+    { "src": "/images/favicon.png", "sizes": "96x96", "type": "image/png" },
+    {
+      "src": "/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

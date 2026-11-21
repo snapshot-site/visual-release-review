@@ -1,0 +1,19 @@
+grumphp:
+    process_timeout: 120
+    stop_on_failure: false
+    hide_circumvention_tip: true
+    fixer:
+        enabled: false
+    tasks:
+        composer:
+            strict: true
+        phplint: ~
+        phpcsfixer:
+            config: .php-cs-fixer.dist.php
+        phpstan:
+            configuration: phpstan.neon.dist
+            memory_limit: 512M
+            use_grumphp_paths: false
+        phpunit:
+            config_file: phpunit.xml.dist
+            always_execute: true

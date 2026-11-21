@@ -1,0 +1,16 @@
+/vendor/
+/var/
+/node_modules/
+/playwright-report/
+/test-results/
+/.env.local
+/.phpunit.cache/
+/config/reference.php
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+/phpstan.neon
+/.env.*.local
+/.env.local.php
+
+# Keep submission scripts, subtitles and video source files local.
+/docs/

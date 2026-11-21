@@ -1,0 +1,75 @@
+{
+  "name": "snapshot-site/visual-release-review",
+  "description": "An evidence-based visual release review with Symfony AI and MCP.",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": "^8.4",
+    "mcp/sdk": "^0.10",
+    "nyholm/psr7": "^1.8",
+    "symfony/ai-agent": "^1.0@beta",
+    "symfony/ai-open-ai-platform": "^1.0@beta",
+    "symfony/console": "^7.4",
+    "symfony/dotenv": "^7.3",
+    "symfony/framework-bundle": "^7.3",
+    "symfony/http-client": "^7.3",
+    "symfony/runtime": "^7.3",
+    "symfony/translation": "^7.4",
+    "symfony/twig-bundle": "^7.3"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.95",
+    "php-parallel-lint/php-parallel-lint": "^1.4",
+    "phpro/grumphp-shim": "^2.27",
+    "phpstan/phpstan": "^2.3",
+    "phpstan/phpstan-phpunit": "^2.1",
+    "phpstan/phpstan-symfony": "^2.1",
+    "phpunit/phpunit": "^11.5",
+    "symfony/browser-kit": "^7.3",
+    "symfony/css-selector": "^7.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "App\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "symfony/runtime": true,
+      "phpro/grumphp-shim": true,
+      "php-http/discovery": false
+    },
+    "sort-packages": true
+  },
+  "minimum-stability": "beta",
+  "prefer-stable": true,
+  "scripts": {
+    "start": "php -S 127.0.0.1:8088 -t public public/router.php",
+    "test": "@test:php",
+    "test:php": "phpunit",
+    "test:unit": "phpunit --testsuite unit",
+    "test:functional": "phpunit --testsuite functional",
+    "cs:check": "php-cs-fixer fix --dry-run --diff",
+    "cs:fix": "php-cs-fixer fix",
+    "analyse": "phpstan analyse --memory-limit=512M --no-progress",
+    "lint:twig": "@php bin/console lint:twig templates",
+    "lint:container": "@php bin/console lint:container",
+    "hooks:install": "grumphp git:init",
+    "quality": [
+      "@composer validate --strict",
+      "@lint:php",
+      "@cs:check",
+      "@analyse",
+      "@test:php",
+      "@lint:twig",
+      "@lint:container"
+    ],
+    "quality:commit": "grumphp run",
+    "lint:php": "parallel-lint src tests public translations config/bundles.php bin/console .php-cs-fixer.dist.php"
+  }
+}

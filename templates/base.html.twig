@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="{{ app.request.locale }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ 'Comparez deux versions de votre page mobile et examinez les changements avec des preuves visuelles et deux agents Symfony AI.'|trans }}">
+    <meta name="theme-color" content="#ff6a00">
+    <title>{% block title %}Visual Release Review · Snapshot Site{% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon.png">
+    <link rel="icon" type="image/x-icon" sizes="16x16 32x32 96x96 192x192" href="/images/favicon_created_by_ss.ico">
+    <link rel="apple-touch-icon" sizes="512x512" href="/images/icon-512x512.png">
+    <link rel="manifest" href="{{ path('manifest', {lang: app.request.locale}) }}">
+    <link rel="stylesheet" href="/app.css">
+    <script src="/app.js" defer></script>
+</head>
+<body>
+<header class="site-header wrap">
+    <a class="brand" href="{{ path('home', {lang: app.request.locale}) }}" aria-label="{{ 'Snapshot Site, accueil'|trans }}">
+        <picture>
+            <source srcset="/images/logo.avif" type="image/avif">
+            <img class="brand-logo" src="/images/logo.png" alt="Snapshot Site" width="387" height="119">
+        </picture>
+        <span class="brand-divider">/</span><span class="brand-product">Release Review</span>
+    </a>
+    <div class="header-actions">
+        <a class="text-link" href="https://snapshot-site.com/mcp-server?utm_source=release-review&utm_medium=demo&utm_campaign=symfony-hackathon">{{ 'Explorer le MCP'|trans }}</a>
+        <nav class="locale-switcher" aria-label="{{ 'Changer de langue'|trans }}">
+            {% for locale, name in {fr: 'Français', en: 'English'} %}
+                <a href="{{ path('home', {lang: locale}) }}" lang="{{ locale }}" hreflang="{{ locale }}" aria-label="{{ name }}"{% if app.request.locale == locale %} aria-current="page"{% endif %}>{{ locale|upper }}</a>
+            {% endfor %}
+        </nav>
+    </div>
+</header>
+<main class="wrap">{% block body %}{% endblock %}</main>
+<footer class="site-footer wrap"><span>{{ 'Des captures. Des preuves. Une seconde lecture.'|trans }}</span><span>Symfony AI <span class="dot">·</span> PHP MCP SDK <span class="dot">·</span> Snapshot Site</span></footer>
+</body>
+</html>

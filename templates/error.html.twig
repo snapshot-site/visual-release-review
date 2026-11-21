@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+{% set funny_titles = {
+    401: 'Le robot fait le videur.',
+    403: 'Le robot fait le videur.',
+    404: 'Cette page joue à cache-cache.',
+    405: 'Bonne porte, mauvaise poignée.',
+    408: 'On a raté le départ.',
+    429: 'Même les robots soufflent un peu.',
+    504: 'On a raté le départ.'
+} %}
+{% set funny_title = funny_titles[status]|default(status >= 500 ? 'Le serveur a renversé son café.' : 'Petit bug, grand détour.') %}
+{% block title %}{{ status }} · {{ error_title|trans }} · Snapshot Site{% endblock %}
+{% block body %}
+<section class="error-page" aria-labelledby="error-title">
+    <div class="error-copy">
+        <p class="eyebrow">{{ 'Oups. Même les pixels ont leurs jours sans.'|trans }}</p>
+        <p class="error-code">{{ status }}</p>
+        <h1 id="error-title">{{ funny_title|trans }}</h1>
+        <p class="intro">{{ error_message|trans }}</p>
+        <a class="button primary" href="{{ path('home', {lang: app.request.locale}) }}"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>{{ 'Retour à l’accueil'|trans }}</a>
+        <p class="error-reassurance">{{ 'L’accueil, lui, n’a pas bougé.'|trans }}</p>
+    </div>
+    <div class="error-illustration" aria-hidden="true">
+        <div class="robot-speech">{{ (status == 404 ? 'Je l’avais il y a une seconde…' : (status == 405 ? 'Le formulaire connaît le chemin.' : 'On remet tout en place.'))|trans }}</div>
+        <svg class="error-robot" viewBox="0 0 360 330" fill="none">
+            <ellipse cx="176" cy="300" rx="120" ry="12" fill="#dde3d8"/>
+            <path d="m66 64-7-13m22 10 2-15m13 19 10-11" stroke="#ff6a00" stroke-width="4" stroke-linecap="round"/>
+            <g transform="rotate(-7 180 162)">
+                <path d="M176 71V49" stroke="#204c3d" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="176" cy="42" r="9" fill="#ff6a00"/>
+                <rect x="79" y="77" width="192" height="152" rx="26" fill="#204c3d"/>
+                <rect x="91" y="89" width="168" height="119" rx="16" fill="#def08b"/>
+                <path d="m124 133 19 7-19 7m100-14-19 7 19 7" stroke="#204c3d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M159 175q17-15 33 0" stroke="#204c3d" stroke-width="5" stroke-linecap="round"/>
+                <path d="m97 117 8-10m0 20 13-14" stroke="white" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+                <circle cx="175" cy="219" r="4" fill="#f6f7f2"/>
+            </g>
+            <path d="m83 185-28 21 16 24m195-42 27 16-10 27" stroke="#204c3d" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="m137 234-9 50h-23m104-49 11 49h23" stroke="#204c3d" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="276" y="256" width="34" height="39" rx="5" fill="#ff6a00"/>
+            <path d="M310 265h5a10 10 0 0 1 0 20h-5" stroke="#ff6a00" stroke-width="5"/>
+            <path d="M285 245c-8-9 8-12 0-21m12 21c-8-9 8-12 0-21" stroke="#a3b48d" stroke-width="3" stroke-linecap="round"/>
+            <path d="m304 91 8-10m2 26 12-1" stroke="#a3b48d" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <span class="robot-caption">{{ 'Diagnostic : besoin d’un petit café.'|trans }}</span>
+    </div>
+</section>
+{% endblock %}
