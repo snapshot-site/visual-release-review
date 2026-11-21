@@ -37,7 +37,13 @@ The header uses Snapshot Site’s AVIF logo with a PNG fallback. The ICO favicon
 
 The image includes PHP 8.4, FrankenPHP and Node 22 on Alpine Linux. `compose.yaml` runs it as UID 10001 with a read-only filesystem, temporary writable cache/session directories, no Linux capabilities, no privilege escalation, and CPU/memory/process limits. Dependencies are locked and base images are pinned by digest. Local API keys, Git history, development dependencies, `docs` and videos are excluded from the build context.
 
-Create the private runtime configuration:
+On a fresh checkout, start the demo with Make:
+
+```sh
+make up
+```
+
+This creates `.env.docker.local` with permissions `600` and a random secret when the file is missing, preserves existing settings, builds the image and waits for the app to become healthy. It requires Make, OpenSSL and Docker Compose. For the same setup without Make:
 
 ```sh
 cp .env.docker.example .env.docker.local
@@ -73,6 +79,25 @@ The Docker tests use fake credentials and make no paid provider calls. They cove
 ### Security check — 2026-11-21
 
 Production Composer and npm audits report no known advisories. Trivy 0.76.2 reports **0 critical vulnerabilities, 1 high vulnerability and 0 secrets** in the tested image. The remaining [CVE-2026-116587](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q) affects the bundled `go-jose/v3` dependency when parsing untrusted JWKs. This Caddy configuration enables PHP and bcrypt authentication, disables the administration API and automatic HTTPS, and does not expose JWT/JWK features. That is a configuration-based reachability assessment, not an upstream patch. Refresh image digests and re-run a full image scan before deploying; dependency audits alone do not cover system packages or bundled Go libraries. Provider quotas and the remote capture service's network restrictions still apply.
+
+## Make commands
+
+Run `make` or `make help` to list every target. Docker commands use `.env.docker.local`; override it with `ENV_FILE=/path/to/private.env`. PHP quality checks and browser tests run on the host using the development dependencies installed by `make install`. Install Chromium with `npx playwright install chromium` before the first browser test.
+
+| Command | Purpose |
+| --- | --- |
+| `make init` | Create the private Docker configuration if missing. |
+| `make build` / `make up` | Build the image / build and start the app. |
+| `make ps` / `make logs` | Check container health / follow logs. |
+| `make restart` / `make down` | Recreate the app with updated settings / stop it. |
+| `make shell` | Open an unprivileged shell in the running container. |
+| `make console ARGS='debug:router'` | Run a Symfony command in Docker. |
+| `make install` / `make dev` | Install local dependencies / start PHP on port 8088. |
+| `make test` | Run PHPUnit. Use `test-unit` or `test-functional` for one suite. |
+| `make test-e2e` | Run the desktop and mobile browser tests. |
+| `make test-docker` | Test an existing image with fake API keys. Override its tag with `IMAGE=your-tag`. |
+| `make quality` / `make fix` | Run all PHP quality checks / apply coding style. |
+| `make audit` | Audit production PHP and Node dependencies. |
 
 ## Compare your own pages
 
