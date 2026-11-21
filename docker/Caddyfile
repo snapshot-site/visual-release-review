@@ -1,0 +1,28 @@
+{
+    admin off
+    auto_https off
+    frankenphp {
+        num_threads 4
+        max_threads 4
+        max_wait_time 10s
+    }
+}
+
+:8080 {
+    root * /app/public
+    encode zstd gzip
+    header -Server
+
+    handle /healthz {
+        root * /app/health
+        rewrite * /index.php
+        php_server
+    }
+
+    handle {
+        import /app/var/access.caddy
+        @phpFiles path *.php *.php/*
+        respond @phpFiles 404
+        php_server
+    }
+}

@@ -1,0 +1,39 @@
+services:
+  app:
+    image: ${REVIEW_IMAGE:-visual-release-review:local}
+    build:
+      context: .
+      target: production
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8080}:8080"
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+      APP_SECRET: ${APP_SECRET:?Set APP_SECRET in .env.docker.local}
+      TRUSTED_HOSTS: '^(localhost|127\.0\.0\.1|visual-review\.snapshot-site\.com)$$'
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      SNAPSHOT_SITE_API_KEY: ${SNAPSHOT_SITE_API_KEY:-}
+      SNAPSHOT_SITE_MCP_TRANSPORT: stdio
+      REVIEW_BASIC_USER: ${REVIEW_BASIC_USER:-}
+      REVIEW_BASIC_PASSWORD_HASH: ${REVIEW_BASIC_PASSWORD_HASH:-}
+    init: true
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /app/var:rw,noexec,nosuid,nodev,size=128m,uid=10001,gid=10001,mode=0700
+      - /tmp:rw,noexec,nosuid,nodev,size=32m,uid=10001,gid=10001,mode=0700
+    mem_limit: 1g
+    cpus: 2
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    stop_grace_period: 30s

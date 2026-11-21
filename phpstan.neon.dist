@@ -11,6 +11,7 @@ parameters:
         - src
         - tests
         - translations
+        - docker/health.php
         - public/index.php
         - public/router.php
         - config/bundles.php

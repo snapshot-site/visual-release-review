@@ -22,7 +22,10 @@ final class Kernel extends BaseKernel
     protected function configureContainer(ContainerConfigurator $container): void
     {
         $container->extension('framework', [
-            'secret' => 'local-visual-review',
+            'secret' => '%env(APP_SECRET)%',
+            'trusted_hosts' => ['%env(TRUSTED_HOSTS)%'],
+            'trusted_proxies' => '%env(TRUSTED_PROXIES)%',
+            'trusted_headers' => ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port'],
             'test' => $this->environment === 'test',
             'http_method_override' => false,
             'default_locale' => 'fr',

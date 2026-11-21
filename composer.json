@@ -70,6 +70,6 @@
       "@lint:container"
     ],
     "quality:commit": "grumphp run",
-    "lint:php": "parallel-lint src tests public translations config/bundles.php bin/console .php-cs-fixer.dist.php"
+    "lint:php": "parallel-lint src tests public translations docker config/bundles.php bin/console .php-cs-fixer.dist.php"
   }
 }

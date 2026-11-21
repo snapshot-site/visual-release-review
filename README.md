@@ -12,6 +12,8 @@ If the agents disagree, the result is **uncertain**. This is a review of a visib
 
 https://github.com/user-attachments/assets/ec691a22-ca0b-4f0d-9cc3-6bc7c636c95b
 
+[Watch on YouTube](https://youtu.be/GqdRkCIvGJc)
+
 ## Run it in five minutes
 
 You need PHP 8.4+, Composer and the usual Symfony extensions, including DOM and XML. Node 20.9+ runs the local MCP server and the browser tests.
@@ -30,6 +32,47 @@ The interface defaults to French. Use the **FR / EN** switch in the header, or o
 The other examples show a harmless color change, an incomplete loading state and a disagreement. Their HTML source lives in `public/fixtures/product.html`; screenshots are generated from that page, not drawn placeholders.
 
 The header uses Snapshot Site’s AVIF logo with a PNG fallback. The ICO favicon, PNG favicon and application icon are included in `public/images`.
+
+## Docker deployment
+
+The image includes PHP 8.4, FrankenPHP and Node 22 on Alpine Linux. `compose.yaml` runs it as UID 10001 with a read-only filesystem, temporary writable cache/session directories, no Linux capabilities, no privilege escalation, and CPU/memory/process limits. Dependencies are locked and base images are pinned by digest. Local API keys, Git history, development dependencies, `docs` and videos are excluded from the build context.
+
+Create the private runtime configuration:
+
+```sh
+cp .env.docker.example .env.docker.local
+chmod 600 .env.docker.local
+openssl rand -hex 32
+# Paste the generated value into APP_SECRET in .env.docker.local.
+docker compose --env-file .env.docker.local up -d --build --wait
+```
+
+Open <http://127.0.0.1:8080> or <http://127.0.0.1:8080/?lang=en>. Empty API keys enable demo mode only. The image requires a random `APP_SECRET` of at least 32 characters and refuses to run with debug enabled. `.env.docker.local` is ignored by Git; keep its values out of build arguments.
+
+To enable live comparisons, set both `OPENAI_API_KEY` and `SNAPSHOT_SITE_API_KEY` in `.env.docker.local`. Live mode also requires `REVIEW_BASIC_USER` and a bcrypt password hash. Generate the hash interactively:
+
+```sh
+docker run --rm -it --entrypoint frankenphp visual-release-review:local hash-password
+```
+
+Paste it as `REVIEW_BASIC_PASSWORD_HASH='$2a$...'`, keeping the single quotes so dollar signs remain literal. Re-run the Compose command to recreate the service. The browser requests credentials before accessing the app. The public `/healthz` endpoint boots Symfony and checks an application route, returning only `ok` or `unavailable` without creating a persistent session.
+
+For **visual-review.snapshot-site.com**, point DNS to the server and use an HTTPS reverse proxy forwarding to `127.0.0.1:8080`. Preserve the Host header, forward `X-Forwarded-Proto`, and allow at least 360 seconds for a comparison response. Set `TRUSTED_PROXIES` to the exact proxy IP/CIDR as seen by the container; never trust every address. Only the configured proxy may declare HTTPS, which enables secure session cookies. Basic authentication requires HTTPS outside local development. Keep the published port bound to loopback. A proxy running in Docker should share a private network with `app` and use `app:8080` instead.
+
+The image builds for the Docker host's architecture. Build on your deployment server, or use `docker buildx build --platform linux/amd64 --target production -t visual-release-review:amd64 --load .` for an x86 server. Set `REVIEW_IMAGE` to your image tag when using a separately built image and start Compose with `--no-build`. The local runtime checks were performed on ARM64; CI also builds and tests the image on GitHub's Linux runner.
+
+```sh
+python3 scripts/test-docker.py
+docker compose --env-file .env.docker.local ps
+docker compose --env-file .env.docker.local logs --tail=100 app
+docker compose --env-file .env.docker.local down
+```
+
+The Docker tests use fake credentials and make no paid provider calls. They cover readiness failures, authentication, CSRF, secure proxy cookies, private files, the read-only runtime and a real PHP-to-Node MCP handshake. Cache and sessions are ephemeral; recreating the service resets browser sessions. Logs are rotated and the health check verifies PHP/Symfony, not just the web server.
+
+### Security check — 2026-11-21
+
+Production Composer and npm audits report no known advisories. Trivy 0.76.2 reports **0 critical vulnerabilities, 1 high vulnerability and 0 secrets** in the tested image. The remaining [CVE-2026-116587](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q) affects the bundled `go-jose/v3` dependency when parsing untrusted JWKs. This Caddy configuration enables PHP and bcrypt authentication, disables the administration API and automatic HTTPS, and does not expose JWT/JWK features. That is a configuration-based reachability assessment, not an upstream patch. Refresh image digests and re-run a full image scan before deploying; dependency audits alone do not cover system packages or bundled Go libraries. Provider quotas and the remote capture service's network restrictions still apply.
 
 ## Compare your own pages
 
@@ -84,7 +127,7 @@ This runs Composer validation, PHP syntax checks, PHP CS Fixer in check mode, PH
 
 GrumPHP installs its pre-commit hook through Composer. It checks the Composer files, PHP syntax, coding style, static analysis and PHPUnit before a commit. The hook reports formatting problems; use `composer cs:fix` to fix them explicitly, then stage the changes again. Run `composer quality` for a full check even before the first commit, when files are still untracked.
 
-The GitHub Actions `quality` job runs `composer quality`; the separate `e2e` job runs the browser tests. Generated caches stay in ignored directories.
+GitHub Actions runs PHP quality checks, production dependency audits, browser tests and the Docker security smoke tests. Generated caches stay in ignored directories.
 
 ## Tests
 
@@ -109,19 +152,11 @@ The `.github/workflows/visual-release-review.yml` workflow runs PHPUnit and Play
 
 ## How the pieces fit
 
-```text
-Form → ReviewInput → PHP MCP SDK → Snapshot Site compare
-                                ↓
-                      Original before + after images
-                                ↓
-                   Symfony AI inspector → Symfony AI critic
-                                ↓
-                    Validated findings → illustrated report
-```
+![Visual Release Review architecture: Form to ReviewInput to PHP MCP SDK to Snapshot Site compare; both original images feed the inspector and critic, then validated findings produce an illustrated report.](assets/architecture-workflow.png)
 
 The domain classes live in `src/Review`. Provider adapters live in `src/Infrastructure`. The controller handles session tokens, input errors and the HTML response. Findings are escaped by Twig; page and model text are treated as data in the prompts.
 
-The initial URL check rejects private/reserved addresses, credentials and unusual ports. It is not a network sandbox: the remote capture service must also enforce its own redirect, DNS and subresource rules. The provided server binds to loopback. Before exposing live calls publicly, add authentication and a shared quota limiter; the included session throttle only helps avoid accidental repeats.
+The initial URL check rejects private/reserved addresses, credentials and unusual ports. It is not a network sandbox: the remote capture service must also enforce its own redirect, DNS and subresource rules. The provided development server binds to loopback. Docker requires authentication for live mode. Add a shared quota limiter before offering access to a wider audience; the included session throttle only helps avoid accidental repeats.
 
 The project is standalone. Keep `composer.lock`, `package-lock.json`, the fixtures and the license in version control; leave out `vendor`, `node_modules`, `var` and `.env.local`.
 

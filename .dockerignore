@@ -1,0 +1,25 @@
+# An allowlist keeps credentials, Git history, videos and local caches out of builds.
+**
+!Dockerfile
+!.env
+!composer.json
+!composer.lock
+!package.json
+!package-lock.json
+!bin/
+!bin/console
+!config/
+!config/bundles.php
+!src/
+!src/**
+!templates/
+!templates/**
+!translations/
+!translations/**
+!public/
+!public/**
+!docker/
+!docker/Caddyfile
+!docker/entrypoint.sh
+!docker/php.ini
+!docker/health.php

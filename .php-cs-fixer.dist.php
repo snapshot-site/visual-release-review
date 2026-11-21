@@ -6,7 +6,7 @@ use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
 $finder = Finder::create()
-    ->in([__DIR__.'/src', __DIR__.'/tests', __DIR__.'/public', __DIR__.'/translations'])
+    ->in([__DIR__.'/src', __DIR__.'/tests', __DIR__.'/public', __DIR__.'/translations', __DIR__.'/docker'])
     ->append([__DIR__.'/config/bundles.php', __DIR__.'/bin/console', __FILE__])
     ->name('*.php');
 
