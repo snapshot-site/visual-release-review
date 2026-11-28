@@ -1,0 +1,58 @@
+name: Trivy Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Hebdomadaire : de nouvelles CVE apparaissent sans changement de code
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trivy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trivy-image:
+    name: Scan de l'image Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      IMAGE_REF: visual-release-review:trivy-scan
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build de l'image (cible production)
+        run: docker build --target production -t "$IMAGE_REF" .
+
+      # Rapport complet (toutes sévérités) : ne bloque jamais, sert à l'analyse.
+      - name: Rapport Trivy (JSON)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE_REF }}
+          scanners: vuln
+          format: json
+          output: trivy-report.json
+          exit-code: "0"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-report
+          path: trivy-report.json
+          retention-days: 14
+
+      # Gate de sécurité : échoue si CVE CRITICAL ou HIGH (avec correctif disponible).
+      - name: Gate Trivy (CRITICAL / HIGH)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE_REF }}
+          scanners: vuln
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
